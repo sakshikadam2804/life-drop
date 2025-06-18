@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blood Donation Certificate</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap');
+        
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .certificate-container {
+            background: white;
+            width: 800px;
+            height: 600px;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .certificate-border {
+            position: absolute;
+            inset: 20px;
+            border: 3px solid #dc2626;
+            border-radius: 8px;
+        }
+
+        .certificate-inner-border {
+            position: absolute;
+            inset: 30px;
+            border: 1px solid #dc2626;
+            border-radius: 6px;
+        }
+
+        .certificate-header {
+            text-align: center;
+            padding: 40px 60px 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .certificate-logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #dc2626, #991b1b);
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: white;
+            box-shadow: 0 10px 20px rgba(220, 38, 38, 0.3);
+        }
+
+        .certificate-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 36px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .certificate-subtitle {
+            font-size: 18px;
+            color: #dc2626;
+            font-weight: 500;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .certificate-body {
+            padding: 20px 60px;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        .certificate-text {
+            font-size: 18px;
+            color: #374151;
+            line-height: 1.8;
+            margin-bottom: 30px;
+        }
+
+        .recipient-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 32px;
+            font-weight: 700;
+            color: #dc2626;
+            margin: 20px 0;
+            text-decoration: underline;
+            text-decoration-color: #dc2626;
+            text-underline-offset: 8px;
+        }
+
+        .donation-details {
+            background: linear-gradient(135deg, #fef2f2, #fee2e2);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 30px 0;
+            border-left: 5px solid #dc2626;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .detail-value {
+            color: #dc2626;
+            font-weight: 500;
+        }
+
+        .certificate-footer {
+            position: absolute;
+            bottom: 40px;
+            left: 60px;
+            right: 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .signature-section {
+            text-align: center;
+        }
+
+        .signature-line {
+            width: 150px;
+            height: 2px;
+            background: #dc2626;
+            margin-bottom: 10px;
+        }
+
+        .signature-text {
+            font-size: 14px;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        .certificate-date {
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .decorative-elements {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            opacity: 0.1;
+        }
+
+        .decorative-heart {
+            position: absolute;
+            font-size: 60px;
+            color: #dc2626;
+        }
+
+        .heart-1 { top: 50px; left: 50px; transform: rotate(-15deg); }
+        .heart-2 { top: 100px; right: 80px; transform: rotate(25deg); }
+        .heart-3 { bottom: 80px; left: 100px; transform: rotate(-10deg); }
+        .heart-4 { bottom: 120px; right: 60px; transform: rotate(20deg); }
+
+        .print-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .print-button:hover {
+            background: #b91c1c;
+            transform: translateY(-2px);
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .print-button {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .certificate-container {
+                width: 95%;
+                height: auto;
+                min-height: 600px;
+            }
+            
+            .certificate-header,
+            .certificate-body {
+                padding: 20px 30px;
+            }
+            
+            .certificate-title {
+                font-size: 28px;
+            }
+            
+            .recipient-name {
+                font-size: 24px;
+            }
+            
+            .certificate-footer {
+                position: relative;
+                bottom: auto;
+                left: auto;
+                right: auto;
+                margin: 20px 30px;
+                flex-direction: column;
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="print-button" onclick="window.print()">🖨️ Print Certificate</button>
+    
+    <div class="certificate-container">
+        <div class="certificate-border"></div>
+        <div class="certificate-inner-border"></div>
+        
+        <div class="decorative-elements">
+            <div class="decorative-heart heart-1">❤️</div>
+            <div class="decorative-heart heart-2">❤️</div>
+            <div class="decorative-heart heart-3">❤️</div>
+            <div class="decorative-heart heart-4">❤️</div>
+        </div>
+        
+        <div class="certificate-header">
+            <div class="certificate-logo">❤️</div>
+            <h1 class="certificate-title">Certificate of Appreciation</h1>
+            <p class="certificate-subtitle">Blood Donation Hero</p>
+        </div>
+        
+        <div class="certificate-body">
+            <p class="certificate-text">
+                This certificate is proudly presented to
+            </p>
+            
+            <div class="recipient-name" id="recipient-name">John Doe</div>
+            
+            <p class="certificate-text">
+                In recognition of your selfless act of donating blood and contributing to saving lives in our community. Your generosity and compassion make you a true hero.
+            </p>
+            
+            <div class="donation-details">
+                <div class="detail-row">
+                    <span class="detail-label">Blood Type:</span>
+                    <span class="detail-value" id="blood-type">O+</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Donation Date:</span>
+                    <span class="detail-value" id="donation-date">January 15, 2025</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Certificate ID:</span>
+                    <span class="detail-value" id="certificate-id">LD-2025-001</span>
+                </div>
+            </div>
+            
+            <p class="certificate-text">
+                Thank you for being a lifesaver. Your donation can help save up to three lives.
+            </p>
+        </div>
+        
+        <div class="certificate-footer">
+            <div class="signature-section">
+                <div class="signature-line"></div>
+                <p class="signature-text">Medical Director</p>
+            </div>
+            
+            <div class="certificate-date" id="issue-date">
+                Issued on: January 15, 2025
+            </div>
+            
+            <div class="signature-section">
+                <div class="signature-line"></div>
+                <p class="signature-text">LifeDrop Team</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get URL parameters to populate certificate
+        const urlParams = new URLSearchParams(window.location.search);
+        const name = urlParams.get('name') || 'John Doe';
+        const bloodType = urlParams.get('bloodType') || 'O+';
+        const date = urlParams.get('date') || new Date().toISOString().split('T')[0];
+        
+        // Generate certificate ID
+        const certificateId = 'LD-' + new Date().getFullYear() + '-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+        
+        // Format date
+        const formattedDate = new Date(date).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+        
+        // Update certificate content
+        document.getElementById('recipient-name').textContent = name;
+        document.getElementById('blood-type').textContent = bloodType;
+        document.getElementById('donation-date').textContent = formattedDate;
+        document.getElementById('certificate-id').textContent = certificateId;
+        document.getElementById('issue-date').textContent = 'Issued on: ' + formattedDate;
+        
+        // Update page title
+        document.title = `Blood Donation Certificate - ${name}`;
+    </script>
+</body>
+</html>

@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifeDrop - Blood Donation Center</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="styles.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav id="navbar" class="navbar">
+        <a href="#home" class="nav-link">Home</a>
+        <a href="#about" class="nav-link">About</a>
+        <a href="#why-donate" class="nav-link">Why Donate</a>
+        <a href="#blood-types" class="nav-link">Blood Types</a>
+        <a href="#centers" class="nav-link">Donation Centers</a>
+        <a href="quiz.html" class="nav-link">Eligibility Quiz</a>
+        <a href="#contact" class="nav-link">Contact</a>
+        <a href="#" id="auth-link" class="nav-link">Admin Login</a>
+    </nav>
+
+    <!-- Main Content -->
+    <main id="main-content">
+        <!-- Hero Section -->
+        <section id="home" class="hero">
+            <div class="hero-background"></div>
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <div class="hero-icon">❤️</div>
+                <h1 class="hero-title">
+                    Your Blood Donation Can Save <br>
+                    <span class="hero-highlight">Three Lives</span>
+                </h1>
+                <p class="hero-description">
+                    Every drop counts. Join our community of life-savers and make a difference today.
+                    One donation can save multiple lives.
+                </p>
+                <div class="hero-buttons">
+                    <a href="quiz.html" class="btn btn-primary">
+                        Check Eligibility <span class="arrow">→</span>
+                    </a>
+                    <a href="#contact" class="btn btn-secondary">Donate Now</a>
+                    <a href="#about" class="btn btn-secondary">Learn More</a>
+                </div>
+            </div>
+            <div class="scroll-indicator">
+                <a href="#about" class="scroll-arrow">↓</a>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="about">
+            <div class="container">
+                <h2 class="section-title">About LifeDrop</h2>
+                <p class="section-description">
+                    LifeDrop is committed to connecting blood donors with patients in need. Our mission is to simplify
+                    the process, encourage regular donations, and ensure that no one suffers due to blood shortages.
+                </p>
+            </div>
+        </section>
+
+        <!-- Why Donate Section -->
+        <section id="why-donate" class="why-donate">
+            <div class="container">
+                <h2 class="section-title">Why Donate Blood?</h2>
+                <p class="section-description">
+                    Blood donation is a selfless act that saves lives every single day. Discover the incredible impact you can make:
+                </p>
+                
+                <!-- Interactive Stats Counter -->
+                <div class="stats-container">
+                    <div class="stat-item">
+                        <div class="stat-number" data-target="3">0</div>
+                        <div class="stat-label">Lives Saved Per Donation</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" data-target="4500">0</div>
+                        <div class="stat-label">Donations This Year</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" data-target="38">0</div>
+                        <div class="stat-label">Seconds Between Needs</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" data-target="1200">0</div>
+                        <div class="stat-label">Active Donors</div>
+                    </div>
+                </div>
+
+                <!-- Interactive Reason Cards -->
+                <div class="reasons-grid">
+                    <div class="reason-card interactive-card" data-reason="save-lives">
+                        <div class="reason-icon">🤝</div>
+                        <h3 class="reason-title">Save Lives</h3>
+                        <p class="reason-description">Your donation can help save up to three lives and make a huge
+                            difference for families in need.</p>
+                        <button class="learn-more-btn">Learn More</button>
+                    </div>
+                    <div class="reason-card interactive-card" data-reason="improve-health">
+                        <div class="reason-icon">💓</div>
+                        <h3 class="reason-title">Improve Health</h3>
+                        <p class="reason-description">Regular blood donation may improve cardiovascular health and
+                            stimulate new blood cell production.</p>
+                        <button class="learn-more-btn">Learn More</button>
+                    </div>
+                    <div class="reason-card interactive-card" data-reason="community-impact">
+                        <div class="reason-icon">👥</div>
+                        <h3 class="reason-title">Community Impact</h3>
+                        <p class="reason-description">Donating blood helps ensure a stable blood supply for emergencies,
+                            surgeries, and cancer treatments.</p>
+                        <button class="learn-more-btn">Learn More</button>
+                    </div>
+                    <div class="reason-card interactive-card" data-reason="quick-easy">
+                        <div class="reason-icon">💧</div>
+                        <h3 class="reason-title">Quick & Easy</h3>
+                        <p class="reason-description">The donation process is simple, safe, and takes less than an hour
+                            — yet it means the world to someone else.</p>
+                        <button class="learn-more-btn">Learn More</button>
+                    </div>
+                </div>
+
+                <!-- Blood Drop Animation -->
+                <div class="blood-drop-animation">
+                    <div class="blood-drop"></div>
+                    <div class="ripple-effect"></div>
+                </div>
+
+                <!-- Impact Tracker -->
+                <div class="impact-tracker">
+                    <h3>Your Potential Impact</h3>
+                    <div class="impact-calculator">
+                        <div class="calculator-input">
+                            <label>If you donate</label>
+                            <select id="donation-frequency">
+                                <option value="1">Once</option>
+                                <option value="2">Twice a year</option>
+                                <option value="4">Quarterly</option>
+                                <option value="6">Every 2 months</option>
+                            </select>
+                            <span>per year</span>
+                        </div>
+                        <div class="impact-results">
+                            <div class="impact-item">
+                                <span class="impact-number" id="lives-saved">3</span>
+                                <span class="impact-text">Lives Saved Annually</span>
+                            </div>
+                            <div class="impact-item">
+                                <span class="impact-number" id="pints-donated">1</span>
+                                <span class="impact-text">Pints Donated</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Blood Types Section -->
+        <section id="blood-types" class="blood-types">
+            <div class="container">
+                <h2 class="section-title">Understanding Blood Types</h2>
+                <div class="section-divider"></div>
+                <p class="section-description">
+                    Knowing your blood type is important for donations. Each type has unique characteristics
+                    and compatibility with other types.
+                </p>
+                <div id="blood-types-grid" class="blood-types-grid">
+                    <!-- Blood type cards will be generated by JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Donation Centers Section -->
+        <section id="centers" class="centers">
+            <div class="container">
+                <h2 class="section-title">Donation Centers</h2>
+                <div id="centers-grid" class="centers-grid">
+                    <!-- Centers will be generated by JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Testimonials Section -->
+        <section id="testimonials" class="testimonials">
+            <div class="container">
+                <h2 class="section-title">Donor Stories</h2>
+                <div class="section-divider"></div>
+                <p class="section-description">
+                    Read inspiring stories from our regular donors and join our community of life-savers.
+                </p>
+                <div class="testimonials-container">
+                    <div id="testimonials-slider" class="testimonials-slider">
+                        <!-- Testimonials will be generated by JavaScript -->
+                    </div>
+                    <div id="testimonials-dots" class="testimonials-dots">
+                        <!-- Dots will be generated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="contact">
+            <div class="container">
+                <h2 class="section-title">Schedule a Donation / Request</h2>
+                <div class="section-description" style="margin-bottom: 2rem;">
+                    <p>Not sure if you're eligible? <a href="quiz.html" style="color: #dc2626; font-weight: 600;">Take our eligibility quiz first!</a></p>
+                </div>
+                <div id="form-messages"></div>
+                <form id="contact-form" class="contact-form">
+                    <div class="form-group">
+                        <label for="userType">I am a:</label>
+                        <select id="userType" name="userType" required>
+                            <option value="">Select</option>
+                            <option value="donor">Blood Donor</option>
+                            <option value="receiver">Blood Receiver</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <input type="text" id="name" name="name" placeholder="Full Name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <input type="email" id="email" name="email" placeholder="Email" required>
+                    </div>
+
+                    <div class="form-group">
+                        <input type="tel" id="phone" name="phone" placeholder="Phone Number" required>
+                    </div>
+
+                    <div class="form-group">
+                        <select id="bloodType" name="bloodType" required>
+                            <option value="">Select Blood Type</option>
+                            <option value="A+">A+</option>
+                            <option value="A-">A-</option>
+                            <option value="B+">B+</option>
+                            <option value="B-">B-</option>
+                            <option value="AB+">AB+</option>
+                            <option value="AB-">AB-</option>
+                            <option value="O+">O+</option>
+                            <option value="O-">O-</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <input type="date" id="preferredDate" name="preferredDate" required>
+                    </div>
+
+                    <div id="receiver-fields" class="receiver-fields" style="display: none;">
+                        <div class="form-group">
+                            <select id="urgency" name="urgency">
+                                <option value="">Select Urgency</option>
+                                <option value="High">High</option>
+                                <option value="Medium">Medium</option>
+                                <option value="Low">Low</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <input type="text" id="hospital" name="hospital" placeholder="Hospital / Location">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <textarea id="message" name="message" placeholder="Additional Notes (optional)"
+                            rows="3"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-full">
+                        <span id="submit-text">Submit</span>
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <div class="footer-content">
+                    <div class="footer-section">
+                        <div class="footer-logo">
+                            <span class="footer-icon">❤️</span>
+                            <span class="footer-brand">LifeDrop</span>
+                        </div>
+                        <p class="footer-description">
+                            Together, we can make a difference. Every donation helps save lives and
+                            strengthen our community.
+                        </p>
+                        <div class="social-links">
+                            <a href="#" class="social-link">📘</a>
+                            <a href="#" class="social-link">🐦</a>
+                            <a href="#" class="social-link">📷</a>
+                            <a href="#" class="social-link">💼</a>
+                        </div>
+                    </div>
+
+                    <div class="footer-section">
+                        <h3 class="footer-title">Quick Links</h3>
+                        <ul class="footer-links">
+                            <li><a href="#about">About Us</a></li>
+                            <li><a href="#blood-types">Blood Types</a></li>
+                            <li><a href="#centers">Donation Centers</a></li>
+                            <li><a href="quiz.html">Eligibility Quiz</a></li>
+                            <li><a href="#contact">Contact</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="footer-section">
+                        <h3 class="footer-title">Resources</h3>
+                        <ul class="footer-links">
+                            <li><a href="#">Donation Process</a></li>
+                            <li><a href="#">Eligibility</a></li>
+                            <li><a href="#">FAQs</a></li>
+                            <li><a href="#">News & Updates</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="footer-section">
+                        <h3 class="footer-title">Contact Info</h3>
+                        <ul class="footer-contact">
+                            <li>1-800-RED-CROSS</li>
+                            <li>donate@lifedrop.org</li>
+                            <li>123 Blood Donor Street,<br>Medical District,<br>New York, NY 10001</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="footer-bottom">
+                    <p>&copy; <span id="current-year"></span> LifeDrop Blood Donation Center. All rights reserved.</p>
+                </div>
+            </div>
+        </footer>
+    </main>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Admin Login</h2>
+            <div id="login-messages"></div>
+            <form id="login-form">
+                <div class="form-group">
+                    <input type="email" id="login-email" placeholder="Email" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="login-password" placeholder="Password" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Panel -->
+    <div id="admin-panel" class="admin-panel" style="display: none;">
+        <div class="admin-header">
+            <h1>Admin Dashboard</h1>
+            <button id="logout-btn" class="btn btn-secondary">Logout</button>
+        </div>
+
+        <div class="admin-tabs">
+            <button id="donors-tab" class="tab-btn active">Donors</button>
+            <button id="receivers-tab" class="tab-btn">Receivers</button>
+            <button id="export-btn" class="btn btn-success">Export CSV</button>
+        </div>
+
+        <div id="admin-loading" class="loading" style="display: none;">Loading...</div>
+        <div id="admin-data" class="admin-data"></div>
+    </div>
+
+    <!-- Detailed Info Modal -->
+    <div id="info-modal" class="modal" style="display: none;">
+        <div class="modal-content info-modal-content">
+            <span class="close-modal">&times;</span>
+            <div id="info-modal-content">
+                <!-- Content will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script src="firebase-config.js"></script>
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+    <script src="jspdf.umd.min.js"></script>
+
+</body>
+
+</html>
