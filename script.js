@@ -5,6 +5,10 @@ let currentUser = null;
 let currentTestimonialIndex = 0;
 let currentAdminTab = 'donors';
 let adminData = [];
+let authToken = localStorage.getItem('authToken');
+
+// API Base URL
+const API_BASE_URL = window.location.origin + '/api';
 
 // Initialize the website when DOM is loaded
 document.addEventListener('DOMContentLoaded', function () {
@@ -14,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function () {
 // Initialize all website functionality
 function initializeWebsite() {
     setupNavigation();
-    setupFirebaseAuth();
+    setupAuth();
     setupContactForm();
     setupLoginModal();
     setupAdminPanel();
@@ -26,6 +30,12 @@ function initializeWebsite() {
     setupStatsCounter();
     setupImpactCalculator();
     setCurrentYear();
+    
+    // Check if user is already logged in
+    if (authToken) {
+        currentUser = { token: authToken };
+        updateAuthUI();
+    }
 }
 
 // Navigation functionality
@@ -86,20 +96,17 @@ function updateActiveNavLink() {
     });
 }
 
-// Firebase Authentication setup
-function setupFirebaseAuth() {
-    // Listen for authentication state changes
-    auth.onAuthStateChanged(function (user) {
-        currentUser = user;
-        updateAuthUI();
-    });
+// Authentication setup
+function setupAuth() {
+    // Update UI based on current auth state
+    updateAuthUI();
 }
 
 // Update UI based on authentication state
 function updateAuthUI() {
     const authLink = document.getElementById('auth-link');
 
-    if (currentUser) {
+    if (currentUser && authToken) {
         authLink.textContent = 'Admin Panel';
         authLink.onclick = showAdminPanel;
     } else {
@@ -136,7 +143,7 @@ function setupContactForm() {
     });
 }
 
-// Submit contact form to Firebase
+// Submit contact form to backend
 async function submitContactForm() {
     const form = document.getElementById('contact-form');
     const submitBtn = form.querySelector('button[type="submit"]');
@@ -156,35 +163,44 @@ async function submitContactForm() {
             data[key] = value;
         });
 
-        // Add timestamp
-        data.submittedAt = firebase.firestore.Timestamp.now();
+        // Determine endpoint based on user type
+        const endpoint = data.userType === 'donor' ? '/donors' : '/receivers';
 
-        // Determine collection based on user type
-        const collection = data.userType === 'donor' ? 'donors' : 'receivers';
+        // Submit to backend
+        const response = await fetch(API_BASE_URL + endpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
 
-        // Save to Firebase
-        await db.collection(collection).add(data);
+        const result = await response.json();
 
-        // Show success message
-        showMessage('✅ Submission successful!', 'success');
+        if (response.ok) {
+            // Show success message
+            showMessage('✅ Submission successful!', 'success');
 
-        // Show certificate button for donors
-        if (data.userType === 'donor') {
-            const certBtn = document.createElement('button');
-            certBtn.textContent = 'View Certificate';
-            certBtn.className = 'btn btn-success';
-            certBtn.style.marginTop = '1rem';
-            certBtn.onclick = () => openCertificate(data.name, data.bloodType, data.preferredDate);
-            messagesDiv.appendChild(certBtn);
+            // Show certificate button for donors
+            if (data.userType === 'donor') {
+                const certBtn = document.createElement('button');
+                certBtn.textContent = 'View Certificate';
+                certBtn.className = 'btn btn-success';
+                certBtn.style.marginTop = '1rem';
+                certBtn.onclick = () => openCertificate(data.name, data.bloodType, data.preferredDate);
+                messagesDiv.appendChild(certBtn);
+            }
+
+            // Reset form
+            form.reset();
+            document.getElementById('receiver-fields').style.display = 'none';
+        } else {
+            throw new Error(result.error || 'Submission failed');
         }
-
-        // Reset form
-        form.reset();
-        document.getElementById('receiver-fields').style.display = 'none';
 
     } catch (error) {
         console.error('Error submitting form:', error);
-        showMessage('❌ Something went wrong. Please try again.', 'error');
+        showMessage('❌ ' + error.message, 'error');
     } finally {
         // Reset button state
         submitText.textContent = 'Submit';
@@ -242,12 +258,31 @@ async function handleLogin() {
     const messagesDiv = document.getElementById('login-messages');
 
     try {
-        await auth.signInWithEmailAndPassword(email, password);
-        hideLoginModal();
-        showAdminPanel();
+        const response = await fetch(API_BASE_URL + '/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email, password })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            // Store auth token
+            authToken = result.token;
+            localStorage.setItem('authToken', authToken);
+            currentUser = result.user;
+            
+            hideLoginModal();
+            updateAuthUI();
+            showAdminPanel();
+        } else {
+            throw new Error(result.error || 'Login failed');
+        }
     } catch (error) {
         console.error('Login error:', error);
-        messagesDiv.innerHTML = '<div class="error-message">Invalid login. Please try again.</div>';
+        messagesDiv.innerHTML = `<div class="error-message">${error.message}</div>`;
     }
 }
 
@@ -271,7 +306,7 @@ function setupAdminPanel() {
 
 // Show admin panel
 function showAdminPanel() {
-    if (!currentUser) {
+    if (!currentUser || !authToken) {
         showLoginModal();
         return;
     }
@@ -299,7 +334,7 @@ function switchAdminTab(tab) {
     loadAdminData();
 }
 
-// Load admin data from Firebase
+// Load admin data from backend
 async function loadAdminData() {
     const loadingDiv = document.getElementById('admin-loading');
     const dataDiv = document.getElementById('admin-data');
@@ -308,16 +343,22 @@ async function loadAdminData() {
     dataDiv.innerHTML = '';
 
     try {
-        const snapshot = await db.collection(currentAdminTab).get();
-        adminData = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-        }));
+        const response = await fetch(API_BASE_URL + '/' + currentAdminTab, {
+            headers: {
+                'Authorization': `Bearer ${authToken}`,
+                'Content-Type': 'application/json'
+            }
+        });
 
-        displayAdminData();
+        if (response.ok) {
+            adminData = await response.json();
+            displayAdminData();
+        } else {
+            throw new Error('Failed to load data');
+        }
     } catch (error) {
         console.error('Error loading admin data:', error);
-        dataDiv.innerHTML = '<div class="error-message">Error loading data</div>';
+        dataDiv.innerHTML = '<div class="error-message">Error loading data. Please try again.</div>';
     } finally {
         loadingDiv.style.display = 'none';
     }
@@ -334,32 +375,69 @@ function displayAdminData() {
 
     // Get all unique keys from the data
     const keys = [...new Set(adminData.flatMap(Object.keys))];
+    const excludeKeys = ['_id', '__v', 'password'];
+    const displayKeys = keys.filter(key => !excludeKeys.includes(key));
 
     // Create table
     let tableHTML = '<table class="admin-table"><thead><tr>';
-    keys.forEach(key => {
+    displayKeys.forEach(key => {
         tableHTML += `<th>${formatColumnName(key)}</th>`;
     });
-    tableHTML += '</tr></thead><tbody>';
+    tableHTML += '<th>Actions</th></tr></thead><tbody>';
 
     // Add data rows
     adminData.forEach(item => {
         tableHTML += '<tr>';
-        keys.forEach(key => {
+        displayKeys.forEach(key => {
             let value = item[key] || '';
 
-            // Format timestamp values
-            if (value && typeof value === 'object' && value.toDate) {
-                value = value.toDate().toLocaleString();
+            // Format date values
+            if (key.includes('Date') || key.includes('At')) {
+                value = new Date(value).toLocaleString();
             }
 
             tableHTML += `<td>${String(value)}</td>`;
         });
+        
+        // Add action buttons
+        tableHTML += `<td>
+            <select onchange="updateStatus('${item._id}', this.value)" class="status-select">
+                <option value="${item.status}" selected>${item.status}</option>
+                ${currentAdminTab === 'donors' ? 
+                    '<option value="pending">Pending</option><option value="confirmed">Confirmed</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option>' :
+                    '<option value="pending">Pending</option><option value="matched">Matched</option><option value="fulfilled">Fulfilled</option><option value="cancelled">Cancelled</option>'
+                }
+            </select>
+        </td>`;
         tableHTML += '</tr>';
     });
 
     tableHTML += '</tbody></table>';
     dataDiv.innerHTML = tableHTML;
+}
+
+// Update status function
+async function updateStatus(id, status) {
+    try {
+        const response = await fetch(API_BASE_URL + '/' + currentAdminTab + '/' + id, {
+            method: 'PATCH',
+            headers: {
+                'Authorization': `Bearer ${authToken}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ status })
+        });
+
+        if (response.ok) {
+            // Reload data to reflect changes
+            loadAdminData();
+        } else {
+            throw new Error('Failed to update status');
+        }
+    } catch (error) {
+        console.error('Error updating status:', error);
+        alert('Failed to update status. Please try again.');
+    }
 }
 
 // Format column names for display
@@ -385,9 +463,9 @@ function exportToCSV() {
         const row = keys.map(key => {
             let value = item[key] || '';
 
-            // Format timestamp values
-            if (value && typeof value === 'object' && value.toDate) {
-                value = value.toDate().toISOString();
+            // Format date values
+            if (key.includes('Date') || key.includes('At')) {
+                value = new Date(value).toISOString();
             }
 
             // Escape commas and quotes
@@ -415,7 +493,13 @@ function exportToCSV() {
 // Handle admin logout
 async function handleLogout() {
     try {
-        await auth.signOut();
+        // Clear local storage
+        localStorage.removeItem('authToken');
+        authToken = null;
+        currentUser = null;
+        
+        // Update UI
+        updateAuthUI();
         hideAdminPanel();
     } catch (error) {
         console.error('Logout error:', error);
@@ -780,6 +864,9 @@ function handleError(error, context) {
     const message = error.message || 'An unexpected error occurred';
     alert(`Error: ${message}`);
 }
+
+// Make updateStatus function globally available
+window.updateStatus = updateStatus;
 
 // Initialize everything when the page loads
 if (document.readyState === 'loading') {
